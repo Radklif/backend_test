@@ -1,0 +1,9 @@
+name: echo_test
+on: 
+  workflow_dispatch:
+
+jobs:
+  echo_test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo Димка - кекич!
