@@ -1,6 +1,6 @@
 name: backend
 on:
-  workflow_call:
+  workflow_dispatch:
         
 jobs:
     b_p_backend:
