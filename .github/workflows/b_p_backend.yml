@@ -19,9 +19,9 @@ jobs:
          name: Docker login
          uses: docker/login-action@v2
          with:
-          registry: localhost:5000
-          username: test
-          password: test
+          registry: hub.morfis.ru
+          username: 
+          password: 
         -
          name: Build and push
          uses: docker/build-push-action@v3
