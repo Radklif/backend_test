@@ -37,6 +37,5 @@ jobs:
          with:
           context: ./test_backend
           file: ./test_backend/Dockerfile
-#          build-args: VUE_APP_API_BASE_URL=${{ inputs.api-url }}
           push: true
-          tags: ${{ env.IMAGE }}:${{ inputs.branch }}
+          tags: localhost:5000/test_backend
