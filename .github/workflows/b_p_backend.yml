@@ -1,23 +1,14 @@
 name: backend
 on:
   workflow_call:
-    inputs:
-      branch:
-        required: true
-        type: string
         
 jobs:
     b_p_backend:
       runs-on: self-hosted
       steps:
         - 
-         name: Checkout MB
+         name: Checkout TB
          uses: actions/checkout@v3
-         with:
-          repository: Radklif/backend_test
-          ref: ${{ inputs.branch }}   # dev или master ветка
-          token: ${{ secrets.morfis_build_pat }}
-          path: morfis_backend
         -
          name: Set up QEMU
          uses: docker/setup-qemu-action@v2
