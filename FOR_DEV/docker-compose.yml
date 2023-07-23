@@ -34,7 +34,7 @@ services:
     depends_on:
       - postrgres
 
-  backend:
+  backend_v2:
     container_name: morfis_backend_v2
     image: hub.morfis.ru/morfis_backend_v2
     volumes:
