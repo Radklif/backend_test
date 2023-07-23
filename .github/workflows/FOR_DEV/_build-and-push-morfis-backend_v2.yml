@@ -1,0 +1,51 @@
+name: _Build Morfis Backend v2
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+        
+jobs:
+  build-push-morfis-backend-v2:
+    env:
+      REGISTRY: hub.morfis.ru
+      IMAGE: hub.morfis.ru/morfis_backend_v2
+
+    runs-on: self-hosted
+    steps:
+      -
+        name: Checkout MBSLT
+        uses: actions/checkout@v3
+        with:
+          repository: ecomedis/morfis_backend_service_layer_test
+          ref: ${{ inputs.branch }}   # dev или master ветка
+          token: ${{ secrets.morfis_build_pat }}
+          path: morfis_backend_service_layer_test
+      -
+        name: Checkout MD
+        uses: actions/checkout@v3
+        with:
+          path: morfis_docker
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: hub.morfis.ru
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./morfis_backend_service_layer_test
+          file: ./morfis_docker/build-backend-v2/Dockerfile
+#          build-args: VUE_APP_API_BASE_URL=${{ inputs.api-url }}
+          push: true
+          tags: ${{ env.IMAGE }}:${{ inputs.branch }}
