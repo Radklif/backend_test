@@ -1,0 +1,17 @@
+name: Deploy Backend v2
+on:
+  workflow_dispatch:
+
+jobs:
+  build-backend-v2:
+    uses: ./.github/workflows/_build-and-push-morfis-backend-v2.yml
+    with:
+      branch: master
+    secrets: inherit
+
+  deploy:
+    needs: build-backend-v2
+    uses: ./.github/workflows/_deploy-and-restart-morfis.yml
+    with:
+      branch: master
+    secrets: inherit
