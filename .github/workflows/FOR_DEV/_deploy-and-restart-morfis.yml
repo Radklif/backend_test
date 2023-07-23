@@ -1,0 +1,25 @@
+name: _Deploy and restart Morfis server
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
+jobs:
+  deploy-restart-morfis:
+    runs-on: self-hosted
+    steps:
+    -
+      name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.MORFIS_HOST }}
+        username: ${{ secrets.MORFIS_HOST_USERNAME }}
+        password: ${{ secrets.MORFIS_HOST_PASSWORD }}
+        script: |
+          cd morfis_docker/${{ inputs.branch }}
+          docker-compose down
+          docker-compose pull
+          docker-compose up -d
