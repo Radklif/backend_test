@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+
+  postrgres:
+    container_name: postgres_${VERSION_NAME}
+    image: postgres:14-alpine
+    env_file:
+      - ./${VERSION_NAME}/.env
+    volumes:
+      # - ./database/init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+      # - pg_database_${VERSION_NAME}:/var/lib/postgresql/data
+      - type: volume
+        source: pg_database
+        target: /var/lib/postgresql/data
+
+    expose:
+      - "5432"
+
+  backend:
+    container_name: morfis_backend_${VERSION_NAME}
+    image: hub.morfis.ru/morfis_backend:${VERSION_NAME}
+    volumes:
+      - ./${VERSION_NAME}/static/:/app/static
+    env_file:
+      - ./${VERSION_NAME}/.env
+    expose:
+      - "8000"
+    command: sh -c "
+      ./manage.py collectstatic --no-input
+      && ./manage.py migrate
+      && ./manage.py loaddata ./fixtures/*.json
+      && gunicorn --bind :8000 --workers 3 app.wsgi"
+    depends_on:
+      - postrgres
+
+  backend:
+    container_name: morfis_backend_v2
+    image: hub.morfis.ru/morfis_backend_v2
+    volumes:
+      - ./${VERSION_NAME}/static/:/app/static
+    env_file:
+      - ./${VERSION_NAME}/.env
+    expose:
+      - "6000"
+    command: sh -c "
+      ./manage.py collectstatic --no-input
+      && ./manage.py migrate
+      && ./manage.py loaddata ./fixtures/*.json
+      && gunicorn --bind :6000 --workers 3 app.wsgi"
+
+  frontend:
+    container_name: morfis_frontend_${VERSION_NAME}
+    image: hub.morfis.ru/morfis_frontend:test
+    depends_on:
+      - backend
+
+  web:
+    container_name: morfis_backend_web_${VERSION_NAME}
+    image: nginx:1.19.8-alpine
+    volumes:
+      - ./nginx:/etc/nginx/templates
+      - ./${VERSION_NAME}/logs:/var/log/nginx
+      - ./${VERSION_NAME}/static/:/var/www/static
+    ports:
+      - "127.0.0.1:${APP_EXTERNAL_PORT}:${APP_EXTERNAL_PORT}"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=${APP_EXTERNAL_PORT}
+      - BACKEND_HOST=morfis_backend_${VERSION_NAME}
+      - BACKEND_PORT=8000
+      - BACKEND_HOST2=morfis_backend_v2
+      - BACKEND_PORT2=6000
+      - FRONTEND_HOST=morfis_frontend_${VERSION_NAME}
+      - FRONTEND_PORT=80
+    depends_on:
+      - frontend  
+volumes:
+  pg_database:
+#    external:
+    name: pg_database_${VERSION_NAME}
